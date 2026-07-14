@@ -1,13 +1,3 @@
-
-## Try in a SITL Docker Container
-
-```bash
-docker run -it --rm -p 5760:5760 --env VEHICLE=APMrover2 --env MODEL=rover radarku/ardupilot-sitl
-docker run -it --rm -p 5760:5760 --env VEHICLE=APMrover2 --env MODEL=rover-skid radarku/ardupilot-sitl
-```
-
-
-
 # BlueBoat Vector Field Controller
 
 A custom BlueOS Docker extension designed to control a Blue Robotics BlueBoat (or any ArduRover skid-steering vehicle) using a Lyapunov-stable vector field. 
@@ -23,7 +13,7 @@ Developed at ENSTA Brest.
 * **BlueOS Native:** Packaged with required BlueOS Docker labels for automatic sidebar integration and host network permissions.
 
 ## Mathematical Formulation
-The controller utilizes a normalized target vector field $\vec{f}(\vec{x})$ relative to the boat. Let the relative position vector to the buoy be $\tilde{\vec{x}}$ with distance $r = \|\tilde{\vec{x}}\|$ and target orbit radius $R$. 
+The controller utilizes a normalized target vector field $\mathbf{f}(\mathbf{x})$ relative to the boat. Let the relative position vector to the buoy be $\tilde{\mathbf{x}}$ with distance $r = \|\tilde{\mathbf{x}}\|$ and target orbit radius $R$. 
 
 $$u_x= - x^3 - x * y^2 + x - y$$
 $$u_y= - y^3 - x^2 * y + x + y$$
