@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueBoat Vector Field Controller</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans">
+
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-wide text-cyan-400">BLUEBOAT VECTOR CONTROLLER</h1>
+            <span id="connection-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-red-500 text-white">DISCONNECTED</span>
+        </div>
+    </header>
+
+    <main class="flex-grow p-6 max-w-5xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <div class="space-y-6">
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+                <h2 class="text-lg font-semibold mb-4 text-slate-300">Controller Switch</h2>
+                <button id="toggle-btn" class="w-full py-4 rounded-lg text-lg font-bold tracking-wider transition duration-200 bg-emerald-600 hover:bg-emerald-500 text-white shadow-md">
+                    START VECTOR CONTROLLER
+                </button>
+            </div>
+
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+                <h2 class="text-lg font-semibold mb-4 text-slate-300">Target Settings</h2>
+                <form id="target-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Buoy Latitude</label>
+                        <input type="number" step="0.000001" id="input-lat" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Buoy Longitude</label>
+                        <input type="number" step="0.000001" id="input-lon" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs uppercase tracking-wider text-slate-400 mb-1">Orbit Radius (m)</label>
+                        <input type="number" step="0.1" id="input-radius" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-slate-200 focus:outline-none focus:border-cyan-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold py-2 rounded transition shadow">
+                        Update Target Parameters
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg h-full flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold mb-6 text-slate-300">Live Telemetry</h2>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-slate-950 p-4 rounded border border-slate-850">
+                            <span class="block text-xs text-slate-400 uppercase tracking-wider">Distance to Buoy</span>
+                            <span id="telemetry-distance" class="text-2xl font-mono font-bold text-cyan-400">0.00</span> <span class="text-sm text-slate-400">m</span>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded border border-slate-850">
+                            <span class="block text-xs text-slate-400 uppercase tracking-wider">Angular Error</span>
+                            <span id="telemetry-error" class="text-2xl font-mono font-bold text-cyan-400">0.00</span> <span class="text-sm text-slate-400">°</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 text-sm border-t border-slate-700 pt-4">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Boat Lat/Lon:</span>
+                            <span id="telemetry-boat-pos" class="font-mono text-slate-200">0.000000, 0.000000</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Buoy Lat/Lon:</span>
+                            <span id="telemetry-buoy-pos" class="font-mono text-slate-200">0.000000, 0.000000</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Orbit Radius:</span>
+                            <span id="telemetry-radius" class="font-mono text-slate-200">0.0 m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-3 bg-slate-900 border border-slate-850 rounded text-xs text-slate-400 flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-cyan-500 animate-ping"></div>
+                    <span>Data polling active at 5Hz</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const connBadge = document.getElementById('connection-badge');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const targetForm = document.getElementById('target-form');
+        
+        const telDistance = document.getElementById('telemetry-distance');
+        const telError = document.getElementById('telemetry-error');
+        const telBoatPos = document.getElementById('telemetry-boat-pos');
+        const telBuoyPos = document.getElementById('telemetry-buoy-pos');
+        const telRadius = document.getElementById('telemetry-radius');
+
+        // Poll API every 200ms to update the dashboard values
+        async function updateDashboard() {
+            try {
+                const response = await fetch('/api/state');
+                if (!response.ok) throw new Error('API unreachable');
+                
+                const data = await response.json();
+                
+                // Update Connection Badge
+                connBadge.textContent = 'CONNECTED';
+                connBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500 text-white';
+
+                // Update Toggle Button Style based on activity state
+                if (data.active) {
+                    toggleBtn.textContent = 'STOP VECTOR CONTROLLER';
+                    toggleBtn.className = 'w-full py-4 rounded-lg text-lg font-bold tracking-wider transition duration-200 bg-red-600 hover:bg-red-500 text-white shadow-md';
+                } else {
+                    toggleBtn.textContent = 'START VECTOR CONTROLLER';
+                    toggleBtn.className = 'w-full py-4 rounded-lg text-lg font-bold tracking-wider transition duration-200 bg-emerald-600 hover:bg-emerald-500 text-white shadow-md';
+                }
+
+                // Update Telemetry Displays
+                telDistance.textContent = data.distance_to_buoy;
+                telError.textContent = data.angular_error;
+                telBoatPos.textContent = `${data.boat_lat.toFixed(6)}, ${data.boat_lon.toFixed(6)}`;
+                telBuoyPos.textContent = `${data.target_lat.toFixed(6)}, ${data.target_lon.toFixed(6)}`;
+                telRadius.textContent = `${data.radius} m`;
+
+            } catch (err) {
+                connBadge.textContent = 'DISCONNECTED';
+                connBadge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-red-500 text-white';
+            }
+        }
+
+        // Handle Active state transitions
+        toggleBtn.addEventListener('click', async () => {
+            try {
+                await fetch('/api/toggle', { method: 'POST' });
+                updateDashboard();
+            } catch (err) {
+                console.error('Failed to toggle state:', err);
+            }
+        });
+
+        // Handle parameters update
+        targetForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                lat: parseFloat(document.getElementById('input-lat').value),
+                lon: parseFloat(document.getElementById('input-lon').value),
+                radius: parseFloat(document.getElementById('input-radius').value)
+            };
+
+            try {
+                const response = await fetch('/api/target', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) alert('Parameters successfully sent to the controller.');
+            } catch (err) {
+                console.error('Failed to update target details:', err);
+            }
+        });
+
+        // Loop execution
+        setInterval(updateDashboard, 200);
+    </script>
+</body>
+</html>
