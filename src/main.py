@@ -225,5 +225,5 @@ app.mount("/", StaticFiles(directory="src/static", html=True), name="static")
 # 3. THE EXECUTION BLOCK
 # ==========================================
 if __name__ == "__main__":
-    print("Starting Web Server on port 8080...")
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    print("Starting Web Server on port 8000...")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
