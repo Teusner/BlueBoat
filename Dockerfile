@@ -34,7 +34,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY src/ ./src/
 
 # Expose the FastAPI web server port
-EXPOSE 8000
+EXPOSE 8080
 
 # Set the environment variable for the real BlueBoat UDP endpoint
 ENV MAVLINK_CONN="udpin:0.0.0.0:14551"

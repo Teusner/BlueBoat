@@ -36,7 +36,7 @@ class VectorFieldController:
         print("Background thread waiting for MAVLink heartbeat...")
         self.master.wait_heartbeat()
         print("Heartbeat detected! BlueBoat connected.")
-        
+
         while True:
             # Fetch GLOBAL_POSITION_INT (Provides both GPS and Heading)
             msg = self.master.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=1.0)
@@ -228,5 +228,5 @@ app.mount("/", StaticFiles(directory="src/static", html=True), name="static")
 # 3. THE EXECUTION BLOCK
 # ==========================================
 if __name__ == "__main__":
-    print("Starting Web Server on port 8000...")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    print("Starting Web Server on port 8080...")
+    uvicorn.run(app, host="0.0.0.0", port=8080)
