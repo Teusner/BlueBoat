@@ -25,8 +25,6 @@ class VectorFieldController:
         # We listen on a UDP port. In BlueOS, we will route telemetry to this container's port.
         print(f"Connecting to MAVLink on {connection_string}...")
         self.master = mavutil.mavlink_connection(connection_string)
-        self.master.wait_heartbeat()
-        print("Heartbeat detected! BlueBoat connected.")
         
         # Start the background telemetry and control loop
         self.loop_thread = threading.Thread(target=self._control_loop, daemon=True)
@@ -34,6 +32,11 @@ class VectorFieldController:
 
     def _control_loop(self):
         """Background thread running at ~10Hz to process telemetry and send control efforts."""
+        
+        print("Background thread waiting for MAVLink heartbeat...")
+        self.master.wait_heartbeat()
+        print("Heartbeat detected! BlueBoat connected.")
+        
         while True:
             # Fetch GLOBAL_POSITION_INT (Provides both GPS and Heading)
             msg = self.master.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=1.0)
