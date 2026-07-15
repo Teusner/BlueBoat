@@ -26,12 +26,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Build for standard laptops (amd64) and Raspberry Pi (arm64, arm/v7)
+      # Build for standard laptops (amd64) and modern Raspberry Pi (arm64)
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           push: true
           # This tags the image as 'latest' under your Docker Hub account
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/blueboat-controller:latest
