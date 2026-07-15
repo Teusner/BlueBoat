@@ -1,4 +1,4 @@
 pymavlink==2.4.41
-numpy==1.26.5
+numpy==2.4.6
 fastapi==0.104.1
 uvicorn==0.24.0
