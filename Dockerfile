@@ -40,4 +40,4 @@ EXPOSE 8000
 ENV MAVLINK_CONN="udpin:0.0.0.0:14551"
 
 # Launch the FastAPI server
-CMD ["python", "src/main.py"]
+CMD ["python", "-u", "src/main.py"]
