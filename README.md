@@ -44,7 +44,7 @@ Open your web browser and navigate to `http://localhost:8000`. You can update th
 
 ## 2. Deployment on BlueOS (Physical BlueBoat)
 
-This repository is configured with a GitHub Actions workflow that automatically cross-compiles the Docker image for `linux/arm/v7` and `linux/arm64` (Raspberry Pi compatible) upon pushing to the `main` branch.
+This repository is configured with a GitHub Actions workflow that automatically cross-compiles the Docker image for `linux/arm64` (Raspberry Pi 64-bit compatible) upon pushing to the `main` branch.
 
 ### Installation via Pirate Mode
 Because this is a custom lab extension and not yet published on the official Blue Robotics store, you must install it manually using BlueOS Pirate Mode.
